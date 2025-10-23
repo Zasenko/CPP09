@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <cmath>
+#include <sstream>      // std::stringstream
 
 typedef std::map<std::string, double> DataBase;
 
@@ -23,11 +24,12 @@ class BitcoinExchange {
         DataBase _db;
         void createDB();
 
-        void trim(std::string &s);
-        bool isDateValid(const std::string& date);
-        bool isDigitsAndDot(const std::string& date);
-        bool isDigitsAndDash(const std::string& date);
-        double toDouble(const std::string& str);
+        void trim(std::string &s) const;
+        bool isDateValid(const std::string& date) const;
+        bool isDigitsAndDot(const std::string& date) const;
+        bool isDigitsAndDash(const std::string& date) const;
+        bool isDigitsAndDotAndMinus(const std::string& date) const;
+        double toDouble(const std::string& str) const;
 };
 
 #endif

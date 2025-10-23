@@ -2,10 +2,7 @@
 #include "BitcoinExchange.hpp"
 
 #include <string>
-
 #include <cstdlib>
-#include <sstream>      // std::stringstream
-
 
 int main(int ac, char *av[])
 {
@@ -35,12 +32,7 @@ int main(int ac, char *av[])
     try {
 
         BitcoinExchange exchange;
-
-        std::cout << "-------- ! --------" << std::endl;
-        for (DataBase::const_iterator it = exchange._db.begin(); it != exchange._db.end(); it++)
-        {
-            std::cout << "[" << it->first << "] [" << it->second << "]" << "\n";
-        }
+        exchange.makeSecond(fileName);
 
     }
     catch (const std::logic_error &e) {

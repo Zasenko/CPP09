@@ -1,6 +1,7 @@
 #include "BitcoinExchange.hpp"
 
-BitcoinExchange::BitcoinExchange() {
+BitcoinExchange::BitcoinExchange()
+{
     createDB();
 }
 
@@ -78,6 +79,8 @@ void BitcoinExchange::createDB()
         }
         double value = toDouble(valueStr);
         _db[key] = value;
+
+
     }
     if (file.bad())
     {
@@ -87,7 +90,8 @@ void BitcoinExchange::createDB()
     file.close();
 }
 
-void BitcoinExchange::makeSecond(const std::string &fileName) const {
+void BitcoinExchange::makeSecond(const std::string &fileName) const
+{
 
     std::fstream file;
     file.open(fileName.c_str(), std::fstream::in);
@@ -97,39 +101,54 @@ void BitcoinExchange::makeSecond(const std::string &fileName) const {
 
     std::string line;
     int isFirstLine = 1;
-    
-    std::string line;
-    
+        
     while (std::getline(file, line))
     {
         std::cout << "----------------" << std::endl;
         std::cout << "[" << line << "]" << std::endl;
 
+        std::string key, delim, str_val, rest;
+        std::stringstream ss(line);
+        ss >> key >> delim >> str_val >> rest; // rest if more then 4!
 
+        if (delim != "|" || !rest.empty())
+        {
+            file.close();
+            throw std::logic_error("BitcoinExchange: Incorrect data in " + fileName);
+        }
+        std::cout << "[" << key << "] [" << delim << "] [" << str_val << "]" << std::endl;
 
-    //     std::string key, delim, str_val, rest;
+        if (isFirstLine)
+        {
+            if (key != "date" || str_val != "value")
+            {
+                file.close();
+                throw std::logic_error("BitcoinExchange: Incorrect data in" + fileName);
+            }
+            isFirstLine = 0;
+            continue;
+        }
 
-    //     std::stringstream ss(line);
+        if (key.empty() || key.size() != 10) {
+            file.close();
+            throw std::logic_error("BitcoinExchange: Incorrect data in data.csv");
+        }
 
-    //     ss >> key >> delim >> str_val >> rest; // rest if more then 4!
+        if (!isDateValid(key))
+        {
+            file.close();
+            throw std::logic_error("BitcoinExchange: Incorrect date format in data.csv");
+        }
 
-    //     if (delim != "|" || !rest.empty())
-    //     {
-    //         std::cerr << "Error: !!!!!!!!!!!" << std::endl;
-    //         return 1;
-    //     }
-    //     std::cout << "[" << key << "] [" << delim << "] [" << str_val << "]" << "\n";
+        if (!isDigitsAndDotAndMinus(str_val))
+        {
+            file.close();
+            throw std::logic_error("BitcoinExchange: Incorrect data in data.csv");
+        }
+        double value = toDouble(str_val);
+        //positive  or less 1000!!!!
 
-    //     // TODO: check date!
-    //     // TODO: check atoi overflow!
-    //     int val = atoi(str_val.c_str());
-    //     db[key] = val;
-    // }
-    // if (file.bad())
-    // {
-    //     std::cerr << "Error: while reading file";
-    //     file.close();
-    //     return 1;
+        db2[key] = value;
     }
     if (file.bad())
     {
@@ -139,7 +158,7 @@ void BitcoinExchange::makeSecond(const std::string &fileName) const {
     file.close();
 }
 
-void BitcoinExchange::trim(std::string &s) {
+void BitcoinExchange::trim(std::string &s) const {
     size_t start = s.find_first_not_of(" \t\n\r");
     size_t end = s.find_last_not_of(" \t\n\r");
 
@@ -149,15 +168,23 @@ void BitcoinExchange::trim(std::string &s) {
         s = s.substr(start, end - start + 1);
 }
 
-bool BitcoinExchange::isDigitsAndDash(const std::string& date) {
+bool BitcoinExchange::isDigitsAndDash(const std::string& date) const
+{
     return date.find_first_not_of("0123456789-") == std::string::npos;
 }
 
-bool BitcoinExchange::isDigitsAndDot(const std::string& date) {
+bool BitcoinExchange::isDigitsAndDot(const std::string& date) const
+{
     return date.find_first_not_of("0123456789.") == std::string::npos;
 }
 
-bool BitcoinExchange::isDateValid(const std::string& date)
+bool BitcoinExchange::isDigitsAndDotAndMinus(const std::string& date) const
+{
+    return date.find_first_not_of("0123456789.-") == std::string::npos;
+}
+
+// TODO!!!! date > now or < bitcoin creation!
+bool BitcoinExchange::isDateValid(const std::string& date) const
 {
 
     if (!isDigitsAndDash(date))return false;
@@ -186,7 +213,8 @@ bool BitcoinExchange::isDateValid(const std::string& date)
     return true;
 }
 
-double BitcoinExchange::toDouble(const std::string& str) {
+double BitcoinExchange::toDouble(const std::string& str) const
+{
     char *endptr = NULL;
     double d = std::strtod(str.c_str(), &endptr);
 
