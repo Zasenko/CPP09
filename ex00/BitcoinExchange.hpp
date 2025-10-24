@@ -6,7 +6,9 @@
 #include <map>
 #include <algorithm>
 #include <cmath>
-#include <sstream>      // std::stringstream
+#include <sstream> 
+#include <sstream>
+#include <ctime>
 
 typedef std::map<std::string, double> DataBase;
 
