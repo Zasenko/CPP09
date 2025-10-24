@@ -25,10 +25,10 @@ class BitcoinExchange {
         void createDB();
 
         void trim(std::string &s) const;
-        bool isDateValid(const std::string& date) const;
-        bool isDigitsAndDot(const std::string& date) const;
-        bool isDigitsAndDash(const std::string& date) const;
-        bool isDigitsAndDotAndMinus(const std::string& date) const;
+        bool isDateValid(const std::string &str) const;
+        bool isDigitsAndDot(const std::string &str) const;
+        bool isDigitsAndDash(const std::string &str) const;
+        bool isStringDoubleCorrect(const std::string &str) const;
         double toDouble(const std::string& str) const;
 };
 
