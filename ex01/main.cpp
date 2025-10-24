@@ -9,9 +9,11 @@ int main(int ac, char *av[])
         return 1;
     }
 
-    std::string arg = av[1];
+    const std::string arg = av[1];
 
+    RPN r_p_n;
 
+    r_p_n.process(arg);
 
     return 0;
 }
