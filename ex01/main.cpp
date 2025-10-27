@@ -9,11 +9,15 @@ int main(int ac, char *av[])
         return 1;
     }
 
-    const std::string arg = av[1];
-
-    RPN r_p_n;
-
-    r_p_n.process(arg);
+    try {
+        RPN r_p_n;
+        r_p_n.process(av[1]);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 }

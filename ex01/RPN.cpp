@@ -1,20 +1,12 @@
 #include "RPN.hpp"
 
-RPN::RPN() {
+RPN::RPN() {}
 
-}
-
-RPN::~RPN() {
-    
-}
+RPN::~RPN() {}
 
 void RPN::process(const std::string &arg)
 {
-    if (arg.empty())
-    {
-        std::cerr << "arg.empty()" << std::endl;
-        return;
-    }
+    if (arg.empty()) throw std::logic_error("Empty argument");
 
     std::istringstream iss(arg);
     std::string token;
@@ -22,93 +14,70 @@ void RPN::process(const std::string &arg)
     {
         if (isOperator(token))
         {
-            if (_stack.size() < 2)
-            {
-                std::cerr << "_stack.size() < 2" << std::endl;
-                return;
-            }
+            if (_stack.size() < 2) throw std::logic_error("Wrong numbers count");
 
             int n1 = _stack.top();
             _stack.pop();
             int n2 = _stack.top();
             _stack.pop();
 
-            // TODO: overflow
-            long result;
-
+            long result = 0;
+            
             if (token == "/")
             {
-                if (n1 == 0)
-                {
-                    std::cerr << "n1 == 0" << std::endl;
-                    return;
-                }
-                result = n2 / n1;
-                _stack.push(result);
+                if (n1 == 0) throw std::logic_error("Can't devide by 0");
+                result = static_cast<long>(n2) / static_cast<long>(n1);
             }
             else if (token == "-")
             {
-                result = n2 - n1;
-                _stack.push(result);
+                result = static_cast<long>(n2) - static_cast<long>(n1);
             }
             else if (token == "*")
             {
-                result = n2 * n1;
-                _stack.push(result);
+                result = static_cast<long>(n2) * static_cast<long>(n1);
             }
             else
             {
-                result = n2 + n1;
-                _stack.push(result);
+                result = static_cast<long>(n2) + static_cast<long>(n1);
             }
+            if (result > INT_MAX) throw std::logic_error("Resut is very big number");
+            if (result < INT_MIN) throw std::logic_error("Resut is very small number");
+            _stack.push(result);
         }
         else
         {
-            if (token.size() > 2)
-            {
-                std::cerr << "token.size() > 2" << std::endl;
-                return;
-            }
+            if (token.size() > 2) throw std::logic_error("Wrong argument");
+            if (!isNumber(token)) throw std::logic_error("Wrong argument");
 
-            //check - , digits
-
-            // std::string::const_iterator it = arg.begin();
             int n = atoi(token.c_str());
-            if (n < -9 || n > 9)
-            {
-                std::cerr << "n < -9 || n > 9" << std::endl;
-                return;
-            }
+            if (n < -9) throw std::logic_error("Number is smaller then 9");
+            if (n > 9) throw std::logic_error("Number is bigger then 9");
             _stack.push(n);
-
         }
-
     }
 
-    if (_stack.empty() || _stack.size() != 1)
-    {
-        std::cerr << "_stack.empty() || _stack.size() != 1" << std::endl;
-        return;
-    }
-
+    if (_stack.empty() || _stack.size() != 1) throw std::logic_error("Wrong numbers count");
     std::cout << _stack.top() << std::endl;
-
-    // std::string::const_iterator it = arg.begin();
-
-    // for ( ; it != arg.end(); it++)
-    // {
-    //     if (*it == ' ' || *it == '\t' || *it == '\r')
-    //     {
-    //         it++;
-    //     } else if (std::isdigit(*it)) {
-            
-    //     }
-
-    // }
-
 }
 
 bool RPN::isOperator(const std::string &str)
 {
     return str == "+" || str == "-" || str == "*" || str == "/";
+}
+
+bool RPN::isNumber(const std::string &token)
+{
+    if (token.empty()) return false;
+
+    size_t start = 0;
+    if (token[0] == '-') {
+        if (token.size() == 1) return false;
+        start = 1;
+    }
+
+    for (size_t i = start; i < token.size(); ++i) {
+        if (!std::isdigit(static_cast<unsigned char>(token[i])))
+            return false;
+    }
+    return true;
 }

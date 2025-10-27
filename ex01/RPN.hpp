@@ -5,6 +5,8 @@
 #include <stack>
 #include <sstream>
 #include <cstdlib>
+#include <climits>
+
 
 class RPN {
     public:
@@ -18,7 +20,7 @@ class RPN {
         std::stack<int> _stack;
 
         bool isOperator(const std::string &str);
-
+        bool isNumber(const std::string &token);
 };
 
 #endif
