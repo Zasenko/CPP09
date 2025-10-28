@@ -1,6 +1,8 @@
 
 #include "PmergeMe.hpp"
 
+void test(const vec &cont);
+
 void trim(std::string &s) {
     size_t start = s.find_first_not_of(" \t\n\r");
     size_t end = s.find_last_not_of(" \t\n\r");
@@ -37,6 +39,10 @@ int main(int ac, char *av[])
         return 1;
     }
 
+    // vec cont(ac - 1);
+    vec cont;
+
+
     for (int i = 1; i < ac; i++)
     {
         //check number
@@ -69,9 +75,95 @@ int main(int ac, char *av[])
             std::cerr << "Error: " << arg << " too small number" << std::endl;
             return 1;
         }
-
-        std::cerr << "num " << i << ": " << num << std::endl;
+        cont.push_back(num);
+        std::cout << num << " " ;
     }
+    std::cout << std::endl;
+
+    std::cout << "size " << cont.size() << std::endl;
+
+    test(cont);
 
     return 0;
+}
+
+
+void test(const vec &cont)
+{
+    std::cout << "-- RECURSION --" << std::endl;
+
+    if (cont.size() < 2)
+    {
+        std::cout << "END RECURSION" << std::endl;
+        for (size_t i = 0; i < cont.size(); i++)
+        {
+            std::cout << cont[i] << " ";
+        }
+        std::cout << std::endl;
+        return;
+    }
+    pairCont pCont;
+
+    for (size_t i = 0; i < cont.size(); ) {
+
+        vec pc;
+
+        if (cont[i] < cont[i + 1])
+        {
+            pc.push_back(cont[i]);
+            pc.push_back(cont[i + 1]);
+        }
+        else
+        {
+            pc.push_back(cont[i + 1]);
+            pc.push_back(cont[i]);
+        }
+        pCont.push_back(pc);
+        i++;
+        i++;
+        if (i == cont.size() - 1) {
+            vec pc2;
+            pc2.push_back(cont[i]);
+            pCont.push_back(pc2);
+            i++;
+        }
+    }
+
+    for (size_t i = 0; i < pCont.size(); i++)
+    {
+        std::cout << "[ ";
+
+        for (size_t z = 0; z < pCont[i].size(); z++)
+        {
+            std::cout << pCont[i][z] << " ";
+        }
+        std::cout << "] ";
+    }
+    std::cout << std::endl;
+    vec big;
+    vec pend;
+    int rest = 0;
+    bool hasRest = false;
+
+
+    for (size_t i = 0; i < pCont.size(); i++)
+    {
+        if (pCont[i].size() == 1)
+        {
+            hasRest = true;
+            rest = pCont[i][0];
+            // big.push_back(pCont[i][0]);
+        } else {
+            pend.push_back(pCont[i][0]);
+            big.push_back(pCont[i][1]);
+        }
+    }
+
+    for (size_t i = 0; i < big.size(); i++)
+    {
+        std::cout << big[i] << " ";
+    }
+    std::cout << std::endl;
+    test(big);
+
 }
