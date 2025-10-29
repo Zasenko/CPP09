@@ -47,6 +47,14 @@ std::vector<int> generateJacobsthal(size_t n)
         J0 = J1;
         J1 = J2;
     }
+    std::cout << "Jacobsthal: " ;
+
+    for (size_t i = 0; i < jac.size(); i++)
+    {
+        std::cout << jac[i] << " ";
+    }
+    std::cout << std::endl;
+
     return jac;
 }
 
