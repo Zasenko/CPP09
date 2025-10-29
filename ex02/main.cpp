@@ -1,7 +1,7 @@
 
 #include "PmergeMe.hpp"
 
-void test(const vec &cont);
+void algor(const vec &cont);
 
 void trim(std::string &s) {
     size_t start = s.find_first_not_of(" \t\n\r");
@@ -29,6 +29,54 @@ bool isNumber(const std::string &str)
             return false;
     }
     return true;
+}
+
+std::vector<int> generateJacobsthal(size_t n)
+{
+    std::vector<int> jac;
+    int J0 = 0;
+    int J1 = 1;
+    jac.push_back(J1); // начинаем с 1
+
+    while ((size_t)J1 < n)
+    {
+        int J2 = J1 + 2 * J0;
+        if ((size_t)J2 >= n)
+            break;
+        jac.push_back(J2);
+        J0 = J1;
+        J1 = J2;
+    }
+    return jac;
+}
+
+// Вставка элементов pend в отсортированный массив sorted по Jacobsthal
+void insertPendByJacobsthal(vec &sorted, const vec &pend)
+{
+    std::vector<int> jac = generateJacobsthal(pend.size());
+    std::vector<bool> used(pend.size(), false);
+
+    // Сначала вставляем элементы по Jacobsthal
+    for (size_t i = 0; i < jac.size(); i++)
+    {
+        int idx = jac[i] - 1; // индексы Jacobsthal начинаются с 1
+        if (idx >= 0 && (size_t)idx < pend.size() && !used[idx])
+        {
+            std::vector<int>::iterator it = std::lower_bound(sorted.begin(), sorted.end(), pend[idx]);
+            sorted.insert(it, pend[idx]);
+            used[idx] = true;
+        }
+    }
+
+    // Вставляем оставшиеся элементы
+    for (size_t i = 0; i < pend.size(); i++)
+    {
+        if (!used[i])
+        {
+            std::vector<int>::iterator it = std::lower_bound(sorted.begin(), sorted.end(), pend[i]);
+            sorted.insert(it, pend[i]);
+        }
+    }
 }
 
 int main(int ac, char *av[])
@@ -82,13 +130,13 @@ int main(int ac, char *av[])
 
     std::cout << "size " << cont.size() << std::endl;
 
-    test(cont);
+    algor(cont);
 
     return 0;
 }
 
 
-void test(const vec &cont)
+void algor(const vec &cont)
 {
     std::cout << "-- RECURSION --" << std::endl;
 
@@ -152,18 +200,32 @@ void test(const vec &cont)
         {
             hasRest = true;
             rest = pCont[i][0];
-            // big.push_back(pCont[i][0]);
+            big.push_back(pCont[i][0]);
         } else {
             pend.push_back(pCont[i][0]);
             big.push_back(pCont[i][1]);
         }
     }
 
+    std::string hrs = hasRest ? "rest: " : "no rest:";
+    std::cout << hrs  << rest << std::endl;
+
     for (size_t i = 0; i < big.size(); i++)
     {
         std::cout << big[i] << " ";
     }
     std::cout << std::endl;
-    test(big);
+    algor(big);
+    insertPendByJacobsthal(big, pend);
 
+    if (hasRest)
+    {
+        std::vector<int>::iterator it = std::lower_bound(big.begin(), big.end(), rest);
+        big.insert(it, rest);
+    }
+
+    // вывод
+    for (size_t i = 0; i < big.size(); i++)
+        std::cout << big[i] << " ";
+    std::cout << std::endl;
 }
