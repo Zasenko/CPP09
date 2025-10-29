@@ -1,7 +1,7 @@
 
 #include "PmergeMe.hpp"
 
-void algor(const vec &cont);
+vec algor(const vec &cont);
 
 void trim(std::string &s) {
     size_t start = s.find_first_not_of(" \t\n\r");
@@ -130,13 +130,19 @@ int main(int ac, char *av[])
 
     std::cout << "size " << cont.size() << std::endl;
 
-    algor(cont);
+    vec result = algor(cont);
 
+    std::cout << "FINAL: ";
+    for (size_t i = 0; i < result.size(); i++)
+    {
+        std::cout << result[i] << " ";
+    }
+    std::cout << std::endl;
     return 0;
 }
 
 
-void algor(const vec &cont)
+vec algor(const vec &cont)
 {
     std::cout << "-- RECURSION --" << std::endl;
 
@@ -148,7 +154,7 @@ void algor(const vec &cont)
             std::cout << cont[i] << " ";
         }
         std::cout << std::endl;
-        return;
+        return cont;
     }
     pairCont pCont;
 
@@ -156,25 +162,27 @@ void algor(const vec &cont)
 
         vec pc;
 
-        if (cont[i] < cont[i + 1])
+        if (i + 1 < cont.size())
         {
-            pc.push_back(cont[i]);
-            pc.push_back(cont[i + 1]);
+            if (cont[i] < cont[i + 1])
+            {
+                pc.push_back(cont[i]);
+                pc.push_back(cont[i + 1]);
+            }
+            else
+            {
+                pc.push_back(cont[i + 1]);
+                pc.push_back(cont[i]);
+            }
+            i++;
+            i++;
         }
         else
         {
-            pc.push_back(cont[i + 1]);
             pc.push_back(cont[i]);
-        }
-        pCont.push_back(pc);
-        i++;
-        i++;
-        if (i == cont.size() - 1) {
-            vec pc2;
-            pc2.push_back(cont[i]);
-            pCont.push_back(pc2);
             i++;
         }
+        pCont.push_back(pc);
     }
 
     for (size_t i = 0; i < pCont.size(); i++)
@@ -188,11 +196,11 @@ void algor(const vec &cont)
         std::cout << "] ";
     }
     std::cout << std::endl;
+    
     vec big;
     vec pend;
     int rest = 0;
     bool hasRest = false;
-
 
     for (size_t i = 0; i < pCont.size(); i++)
     {
@@ -200,7 +208,6 @@ void algor(const vec &cont)
         {
             hasRest = true;
             rest = pCont[i][0];
-            big.push_back(pCont[i][0]);
         } else {
             pend.push_back(pCont[i][0]);
             big.push_back(pCont[i][1]);
@@ -215,7 +222,8 @@ void algor(const vec &cont)
         std::cout << big[i] << " ";
     }
     std::cout << std::endl;
-    algor(big);
+
+    big = algor(big);
     insertPendByJacobsthal(big, pend);
 
     if (hasRest)
@@ -228,4 +236,5 @@ void algor(const vec &cont)
     for (size_t i = 0; i < big.size(); i++)
         std::cout << big[i] << " ";
     std::cout << std::endl;
+    return big;
 }
