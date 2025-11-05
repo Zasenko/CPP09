@@ -184,7 +184,7 @@ vec algor(const vec &cont)
         std::cout << std::endl;
         return cont;
     }
-    pairCont pCont;
+    pairVect pCont;
 
     for (size_t i = 0; i < cont.size(); ) {
 
