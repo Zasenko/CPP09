@@ -153,6 +153,17 @@ vec PmergeMe::sortVector(const vec &vector, int &count)
         pCont.push_back(pair);
     }
 
+    for (size_t i = 0; i < pCont.size(); i++)
+    {
+        std::cout << "[ ";
+        for (size_t z = 0; z < pCont[i].size(); z++)
+        {
+            std::cout << pCont[i][z] << " ";
+        }
+        std::cout << "] ";
+    }
+    std::cout << std::endl;
+
     vec big;
     vec pend;
     int rest = 0;
@@ -173,13 +184,11 @@ vec PmergeMe::sortVector(const vec &vector, int &count)
     }
 
     big = sortVector(big, count);
-
     insertPendVector(big, pend, count);
-
     if (hasRest)
     {
         size_t position = binarySearch(big, rest, count);
-        // std::cout << "hasRest insert at position: " << pos << ", value: " << rest << std::endl;
+        std::cout << "hasRest insert at position: " << position << ", value: " << rest << std::endl;
         big.insert(big.begin() + position, rest);
     }
     return big;
@@ -190,14 +199,9 @@ void PmergeMe::insertPendVector(vec &sorted, const vec &pend, int &count)
     if (pend.empty())
         return;
         
-    std::vector<size_t> jacobOrder = buildJacobOrder(pend.size());
     std::vector<size_t> jacobOrder2 = buildJacobOrder2(pend.size());
 
     std::cout << "Jacobsthal order: ";
-    for (size_t i = 0; i < jacobOrder.size(); i++)
-        std::cout << jacobOrder[i] << " ";
-    std::cout << std::endl;
-        std::cout << "Jacobsthal 2 order: ";
     for (size_t i = 0; i < jacobOrder2.size(); i++)
         std::cout << jacobOrder2[i] << " ";
     std::cout << std::endl;
@@ -227,58 +231,9 @@ void PmergeMe::insertPendVector(vec &sorted, const vec &pend, int &count)
         else
             pos = binarySearch(sorted, value, count);
 
-        // std::cout << "Insert pend[" << idx << "] = " << value << " at position " << pos << std::endl;
+        std::cout << "Insert pend[" << idx << "] = " << value << " at position " << pos << std::endl;
         sorted.insert(sorted.begin() + pos, value);
     }
-}
-
-
-
-std::vector<size_t> PmergeMe::buildJacobOrder(size_t n)
-{
-    std::vector<size_t> order;
-    if (n == 0)
-        return order;
-
-    // Построение чисел Якобсталя J_k
-    std::vector<size_t> jNums;
-    jNums.push_back(0);
-    jNums.push_back(1);
-
-    while (true)
-    {
-        size_t next = jNums.back() + 2 * jNums[jNums.size() - 2];
-        if (next >= n)
-            break;
-        jNums.push_back(next);
-    }
-
-    // Генерация порядка вставки: группы в обратном порядке
-    for (int k = jNums.size() - 1; k > 0; --k)
-    {
-        size_t start = jNums[k - 1];
-        size_t end = std::min(jNums[k], n);
-
-        // Добавляем элементы от end-1 до start (в обратном порядке)
-        for (size_t i = end; i > start; --i)
-        {
-            size_t idx = i - 1;
-            if (idx < n)
-                order.push_back(idx);
-        }
-    }
-
-    // Проверка, что все индексы от 0 до n-1 есть
-    std::vector<bool> used(n, false);
-    for (size_t i = 0; i < order.size(); i++)
-        if (order[i] < n)
-            used[order[i]] = true;
-
-    for (size_t i = 0; i < n; i++)
-        if (!used[i])
-            order.push_back(i);
-
-    return order;
 }
 
 // deq PmergeMe::sortDeque(const deq &d)
