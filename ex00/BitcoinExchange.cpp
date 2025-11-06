@@ -253,6 +253,21 @@ bool BitcoinExchange::isStringDoubleCorrect(const std::string &str) const
     return true;
 }
 
+bool BitcoinExchange::isMoreThanThousand(const std::string &str) const
+{
+    std::string::size_type pos = str.find('.');
+    std::string intPart = (pos == std::string::npos) ? str : str.substr(0, pos);
+
+    while (intPart.size() > 1 && intPart[0] == '0')
+        intPart.erase(0, 1);
+
+    if (intPart.size() > 4)
+        return true; // 10000, 123456...
+    if (intPart.size() < 4)
+        return false;        // 0, 5, 999...
+    return intPart > "1000"; // строковое сравнение
+}
+
 bool BitcoinExchange::isDateValid(const std::string& date) const
 {
 

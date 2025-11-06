@@ -29,68 +29,68 @@ size_t binarySearch(vec &arr, int x, int &count)
 }
 
 
-void insertPendByJacobsthal2(vec &sorted, const vec &pend, int &count)
-{
-    std::cout << "= insertPendByJacobsthal2 =" << std::endl;
+// void insertPendByJacobsthal2(vec &sorted, const vec &pend, int &count)
+// {
+//     std::cout << "= insertPendByJacobsthal2 =" << std::endl;
 
-    if (pend.empty())
-        return;
+//     if (pend.empty())
+//         return;
 
-    std::vector<size_t> jacobOrder = buildJacobOrder(pend.size());
+//     std::vector<size_t> jacobOrder = buildJacobOrder(pend.size());
 
-    std::cout << "Jacobsthal order: ";
-    for (size_t i = 0; i < jacobOrder.size(); i++)
-        std::cout << jacobOrder[i] << " ";
-    std::cout << std::endl;
+//     std::cout << "Jacobsthal order: ";
+//     for (size_t i = 0; i < jacobOrder.size(); i++)
+//         std::cout << jacobOrder[i] << " ";
+//     std::cout << std::endl;
 
-    for (size_t i = 0; i < jacobOrder.size(); ++i)
-    {
-        size_t idx = jacobOrder[i];
-        if (idx >= pend.size())
-        {
-            std::cerr << "Warning: index " << idx << " out of bounds for pend size " << pend.size() << std::endl;
-            continue;
-        }
+//     for (size_t i = 0; i < jacobOrder.size(); ++i)
+//     {
+//         size_t idx = jacobOrder[i];
+//         if (idx >= pend.size())
+//         {
+//             std::cerr << "Warning: index " << idx << " out of bounds for pend size " << pend.size() << std::endl;
+//             continue;
+//         }
 
-        int value = pend[idx];
-        size_t pos = 0;
+//         int value = pend[idx];
+//         size_t pos = 0;
 
-        // Оптимизация: вставка в начало или конец без бинарного поиска
-        if (sorted.empty() || value <= sorted.front())
-        {
-            pos = 0;
-        }
-        else if (value >= sorted.back())
-        {
-            pos = sorted.size();
-        }
-        else
-        {
-            // бинарный поиск только в "среднем диапазоне"
-            size_t leftBound = 1;
-            size_t rightBound = sorted.size() - 1;
+//         // Оптимизация: вставка в начало или конец без бинарного поиска
+//         if (sorted.empty() || value <= sorted.front())
+//         {
+//             pos = 0;
+//         }
+//         else if (value >= sorted.back())
+//         {
+//             pos = sorted.size();
+//         }
+//         else
+//         {
+//             // бинарный поиск только в "среднем диапазоне"
+//             size_t leftBound = 1;
+//             size_t rightBound = sorted.size() - 1;
 
-            size_t left = leftBound;
-            size_t right = rightBound;
+//             size_t left = leftBound;
+//             size_t right = rightBound;
 
-            while (left < right)
-            {
-                size_t mid = left + (right - left) / 2;
-                count++; // считаем сравнение
-                std::cout << "-> count ++ :" << count << std::endl;
-                ;
-                if (sorted[mid] < value)
-                    left = mid + 1;
-                else
-                    right = mid;
-            }
-            pos = left;
-        }
+//             while (left < right)
+//             {
+//                 size_t mid = left + (right - left) / 2;
+//                 count++; // считаем сравнение
+//                 std::cout << "-> count ++ :" << count << std::endl;
+//                 ;
+//                 if (sorted[mid] < value)
+//                     left = mid + 1;
+//                 else
+//                     right = mid;
+//             }
+//             pos = left;
+//         }
 
-        std::cout << "Insert pend[" << idx << "] = " << value << " at position " << pos << std::endl;
-        sorted.insert(sorted.begin() + pos, value);
-    }
-}
+//         std::cout << "Insert pend[" << idx << "] = " << value << " at position " << pos << std::endl;
+//         sorted.insert(sorted.begin() + pos, value);
+//     }
+// }
 
 int main(int ac, char *av[])
 {

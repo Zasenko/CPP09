@@ -10,37 +10,43 @@ PmergeMe::PmergeMe(int ac, char *av[])
     for (int i = 1; i < ac; i++)
     {
         std::string arg = av[i];
-        if (arg.length() == 0) throw std::logic_error("Empty argument");
+        if (arg.length() == 0)
+            throw std::logic_error("Empty argument");
         trim(arg);
-        if (arg.length() == 0) throw std::logic_error("Empty argument");
-        if (!isNumber(arg)) throw std::logic_error("Wrong argument: " + arg);
-        if (arg.length() > 11) throw std::logic_error("Wrong argument: " + arg);
+        if (arg.length() == 0)
+            throw std::logic_error("Empty argument");
+        if (!isNumber(arg))
+            throw std::logic_error("Wrong argument: " + arg);
+        if (arg.length() > 11)
+            throw std::logic_error("Wrong argument: " + arg);
         long num = std::atol(arg.c_str());
-        if (num > INT_MAX) throw std::logic_error("Very big number: " + arg);
-        if (num < 0) throw std::logic_error("Negative number: " + arg);
+        if (num > INT_MAX)
+            throw std::logic_error("Very big number: " + arg);
+        if (num < 0)
+            throw std::logic_error("Negative number: " + arg);
 
         _v.push_back(num);
         _d.push_back(num);
     }
 
     std::cout << "Before: ";
-    for (size_t i = 0; i < _v.size(); i++)
-    {
-        std::cout << _v[i] << " ";
-    }
+    for (size_t i = 0; i < _v.size(); i++) std::cout << _v[i] << " ";
     std::cout << std::endl;
 }
 
 void PmergeMe::sort()
 {
     clock_t start = clock();
-    vec result = sortVector(_v);
+    vec vectorResult = sortVector(_v);
     clock_t end = clock();
 
-
+    std::cout << "After: ";
+    for (size_t i = 0; i < vectorResult.size(); i++)
+        std::cout << vectorResult[i] << " ";
+    std::cout << std::endl;
+    
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     std::cout << "Time elapsed: " << elapsed << " seconds" << std::endl;
-    
 }
 
 vec PmergeMe::sortVector(const vec &vector)
@@ -52,29 +58,28 @@ vec PmergeMe::sortVector(const vec &vector)
 
     for (size_t i = 0; i < vectorSize; )
     {
-
-        vec pc;
+        vec pair;
         if (i + 1 < vectorSize)
         {
             if (vector[i] < vector[i + 1])
             {
-                pc.push_back(vector[i]);
-                pc.push_back(vector[i + 1]);
+                pair.push_back(vector[i]);
+                pair.push_back(vector[i + 1]);
             }
             else
             {
-                pc.push_back(vector[i + 1]);
-                pc.push_back(vector[i]);
+                pair.push_back(vector[i + 1]);
+                pair.push_back(vector[i]);
             }
             i++;
             i++;
         }
         else
         {
-            pc.push_back(vector[i]);
+            pair.push_back(vector[i]);
             i++;
         }
-        pCont.push_back(pc);
+        pCont.push_back(pair);
     }
 
     vec big;
@@ -97,55 +102,48 @@ vec PmergeMe::sortVector(const vec &vector)
     }
 
     big = sortVector(big);
-    
-//     insertPendByJacobsthal2(big, pend, count);
 
-//     if (hasRest)
-//     {
-//         size_t pos = 0;
-//         if (rest <= big.front())
-//         {
-//             pos = 0;
-//         }
-//         else if (rest >= big.back())
-//         {
-//             pos = big.size();
-//         }
-//         else
-//         {
-//             // бинарный поиск только в "среднем диапазоне"
-//             size_t leftBound = 1;
-//             size_t rightBound = big.size() - 1;
-//             size_t left = leftBound;
-//             size_t right = rightBound;
+    insertPendVector(big, pend);
 
-//             while (left < right)
-//             {
-//                 size_t mid = left + (right - left) / 2;
-//                 count++; // считаем сравнение
-//                 if (big[mid] < rest)
-//                     left = mid + 1;
-//                 else
-//                     right = mid;
-//             }
-//             pos = left;
-//         }
+    if (hasRest)
+    {
+        size_t pos = 0;
+        if (rest <= big.front())
+            pos = 0;
+        else if (rest >= big.back())
+            pos = big.size();
+        else
+        {
+            // бинарный поиск только в "среднем диапазоне"
+            size_t leftBound = 1;
+            size_t rightBound = big.size() - 1;
+            size_t left = leftBound;
+            size_t right = rightBound;
+            while (left < right)
+            {
+                size_t mid = left + (right - left) / 2;
+                if (big[mid] < rest)
+                    left = mid + 1;
+                else
+                    right = mid;
+            }
+            pos = left;
+        }
+        // std::cout << "hasRest insert at position: " << pos << ", value: " << rest << std::endl;
+        big.insert(big.begin() + pos, rest);
+    }
 
-//         std::cout << "hasRest insert at position: " << pos << ", value: " << rest << std::endl;
-//         big.insert(big.begin() + pos, rest);
-//     }
-
-//     // вывод
-//     for (size_t i = 0; i < big.size(); i++)
-//         std::cout << big[i] << " ";
-//     std::cout << std::endl;
-//     return big;
+    // // вывод
+    // for (size_t i = 0; i < big.size(); i++)
+    //     std::cout << big[i] << " ";
+    // std::cout << std::endl;
+    return big;
 }
 
-void sortDeque()
-{
-    
-}
+// deq PmergeMe::sortDeque(const deq &d)
+// {
+//     (void)d;
+// }
 
 // --- INSERT ---
 

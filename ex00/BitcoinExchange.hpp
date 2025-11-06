@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <cmath>
 #include <sstream> 
-#include <sstream>
 #include <ctime>
 
 typedef std::map<std::string, double> DataBase;
@@ -31,6 +30,7 @@ class BitcoinExchange {
         bool isDigitsAndDot(const std::string &str) const;
         bool isDigitsAndDash(const std::string &str) const;
         bool isStringDoubleCorrect(const std::string &str) const;
+        bool isMoreThanThousand(const std::string &str) const;
         double toDouble(const std::string& str) const;
 };
 

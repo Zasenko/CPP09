@@ -28,7 +28,7 @@ class PmergeMe {
         deq _d;
 
         vec sortVector(const vec &v);
-        void sortDeque();
+        // deq sortDeque(const deq &d);
 
         void insertPendVector(vec &sorted, const vec &pend);
 
