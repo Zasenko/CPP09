@@ -15,8 +15,7 @@ class BitcoinExchange {
     public:
         BitcoinExchange();
         ~BitcoinExchange();
-        // DataBase _db;
-        void makeSecond(const std::string &fileName) const;
+        void exchange(const std::string &fileName) const;
 
     private:
         BitcoinExchange(const BitcoinExchange &copy);

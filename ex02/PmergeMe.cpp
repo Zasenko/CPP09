@@ -1,5 +1,62 @@
 #include "PmergeMe.hpp"
 
+size_t binarySearch(const vec &sorted, int value, int &count)
+{
+    if (sorted.empty())
+        return 0;
+
+    size_t left = 0;
+    size_t right = sorted.size();
+    
+    while (left < right)
+    {
+        count++;
+        size_t mid = left + (right - left) / 2;
+        if (sorted[mid] < value)
+            left = mid + 1;
+        else
+            right = mid;
+    }
+    return left;
+}
+
+std::vector<size_t> buildJacobOrder2(size_t n)
+{
+    std::vector<size_t> order;
+    if (n == 0) return order;
+    
+    // Generate Jacobsthal numbers up to n
+    std::vector<size_t> jacob;
+    jacob.push_back(1);
+    jacob.push_back(3);
+    
+    while (jacob.back() < n)
+    {
+        size_t next = jacob[jacob.size() - 1] + 2 * jacob[jacob.size() - 2];
+        jacob.push_back(next);
+    }
+    
+    // Build insertion order
+    order.push_back(0); // First element is always at index 0
+    
+    for (size_t i = 0; i < jacob.size(); i++)
+    {
+        size_t j = jacob[i];
+        if (j < n) order.push_back(j);
+        
+        // Add numbers between previous Jacobsthal numbers
+        if (i > 0)
+        {
+            size_t prev = jacob[i - 1];
+            for (size_t k = j - 1; k > prev; k--)
+            {
+                if (k < n) order.push_back(k);
+            }
+        }
+    }
+    
+    return order;
+}
 
 PmergeMe::~PmergeMe() {}
 
@@ -36,8 +93,10 @@ PmergeMe::PmergeMe(int ac, char *av[])
 
 void PmergeMe::sort()
 {
+    int count = 0;
+
     clock_t vectorStart = clock();
-    vec vectorResult = sortVector(_v);
+    vec vectorResult = sortVector(_v, count);
     clock_t vectorEnd = clock();
 
     std::cout << "After: ";
@@ -48,6 +107,9 @@ void PmergeMe::sort()
     double vectorElapsed = double(vectorEnd - vectorStart) / CLOCKS_PER_SEC;
     std::cout << "Time elapsed: " << vectorElapsed << " seconds" << std::endl;
 
+        std::cout << "Count: " << count << std::endl;
+
+
     // clock_t dequeStart = clock();
     // vec vectorResult = sortVector(_v);
     // clock_t dequeEnd = clock();
@@ -57,7 +119,7 @@ void PmergeMe::sort()
 
 }
 
-vec PmergeMe::sortVector(const vec &vector)
+vec PmergeMe::sortVector(const vec &vector, int &count)
 {
     size_t vectorSize = vector.size();
     if (vectorSize < 2) return vector;
@@ -69,6 +131,7 @@ vec PmergeMe::sortVector(const vec &vector)
         vec pair;
         if (i + 1 < vectorSize)
         {
+            count++;
             if (vector[i] < vector[i + 1])
             {
                 pair.push_back(vector[i]);
@@ -109,135 +172,112 @@ vec PmergeMe::sortVector(const vec &vector)
         }
     }
 
-    big = sortVector(big);
+    big = sortVector(big, count);
 
-    insertPendVector(big, pend);
+    insertPendVector(big, pend, count);
 
     if (hasRest)
     {
-        size_t pos = 0;
-        if (rest <= big.front())
-            pos = 0;
-        else if (rest >= big.back())
-            pos = big.size();
-        else
-        {
-            // бинарный поиск только в "среднем диапазоне"
-            size_t leftBound = 1;
-            size_t rightBound = big.size() - 1;
-            size_t left = leftBound;
-            size_t right = rightBound;
-            while (left < right)
-            {
-                size_t mid = left + (right - left) / 2;
-                if (big[mid] < rest)
-                    left = mid + 1;
-                else
-                    right = mid;
-            }
-            pos = left;
-        }
+        size_t position = binarySearch(big, rest, count);
         // std::cout << "hasRest insert at position: " << pos << ", value: " << rest << std::endl;
-        big.insert(big.begin() + pos, rest);
+        big.insert(big.begin() + position, rest);
     }
     return big;
 }
 
-void PmergeMe::insertPendVector(vec &sorted, const vec &pend)
+void PmergeMe::insertPendVector(vec &sorted, const vec &pend, int &count)
 {
     if (pend.empty())
         return;
         
     std::vector<size_t> jacobOrder = buildJacobOrder(pend.size());
+    std::vector<size_t> jacobOrder2 = buildJacobOrder2(pend.size());
 
-    // std::cout << "Jacobsthal order: ";
-    // for (size_t i = 0; i < jacobOrder.size(); i++)
-    //     std::cout << jacobOrder[i] << " ";
-    // std::cout << std::endl;
+    std::cout << "Jacobsthal order: ";
+    for (size_t i = 0; i < jacobOrder.size(); i++)
+        std::cout << jacobOrder[i] << " ";
+    std::cout << std::endl;
+        std::cout << "Jacobsthal 2 order: ";
+    for (size_t i = 0; i < jacobOrder2.size(); i++)
+        std::cout << jacobOrder2[i] << " ";
+    std::cout << std::endl;
 
-    for (size_t i = 0; i < jacobOrder.size(); ++i)
+    for (size_t i = 0; i < jacobOrder2.size(); i++)
     {
-        size_t idx = jacobOrder[i];
+        size_t idx = jacobOrder2[i];
         if (idx >= pend.size())
-        {
-            std::cerr << "Warning: index " << idx << " out of bounds for pend size " << pend.size() << std::endl;
             continue;
-        }
 
         int value = pend[idx];
         size_t pos = 0;
 
         // Оптимизация: вставка в начало или конец без бинарного поиска
         if (sorted.empty() || value <= sorted.front())
-        {
             pos = 0;
-        }
         else if (value >= sorted.back())
-        {
             pos = sorted.size();
+        else if (i < 3)
+        {
+            for (pos = 0; pos < sorted.size(); pos++)
+            {
+                if (value < sorted[pos])
+                    break;
+            }
         }
         else
-        {
-            // бинарный поиск только в "среднем диапазоне"
-            size_t leftBound = 1;
-            size_t rightBound = sorted.size() - 1;
-
-            size_t left = leftBound;
-            size_t right = rightBound;
-
-            while (left < right)
-            {
-                size_t mid = left + (right - left) / 2;
-                // std::cout << "-> count ++ :" << count << std::endl;
-                if (sorted[mid] < value)
-                    left = mid + 1;
-                else
-                    right = mid;
-            }
-            pos = left;
-        }
+            pos = binarySearch(sorted, value, count);
 
         // std::cout << "Insert pend[" << idx << "] = " << value << " at position " << pos << std::endl;
         sorted.insert(sorted.begin() + pos, value);
     }
 }
 
+
+
 std::vector<size_t> PmergeMe::buildJacobOrder(size_t n)
 {
     std::vector<size_t> order;
-    std::vector<size_t> jNums;
-    std::vector<bool> used(n, false);
-
     if (n == 0)
         return order;
 
+    // Построение чисел Якобсталя J_k
+    std::vector<size_t> jNums;
     jNums.push_back(0);
     jNums.push_back(1);
 
     while (true)
     {
-        size_t next = jNums[jNums.size() - 1] + 2 * jNums[jNums.size() - 2];
+        size_t next = jNums.back() + 2 * jNums[jNums.size() - 2];
         if (next >= n)
             break;
         jNums.push_back(next);
     }
-    for (size_t k = 0; k < jNums.size(); k++)
+
+    // Генерация порядка вставки: группы в обратном порядке
+    for (int k = jNums.size() - 1; k > 0; --k)
     {
-        size_t idx = jNums[k];
-        if (idx < n && !used[idx])
+        size_t start = jNums[k - 1];
+        size_t end = std::min(jNums[k], n);
+
+        // Добавляем элементы от end-1 до start (в обратном порядке)
+        for (size_t i = end; i > start; --i)
         {
-            order.push_back(idx);
-            used[idx] = true;
+            size_t idx = i - 1;
+            if (idx < n)
+                order.push_back(idx);
         }
     }
+
+    // Проверка, что все индексы от 0 до n-1 есть
+    std::vector<bool> used(n, false);
+    for (size_t i = 0; i < order.size(); i++)
+        if (order[i] < n)
+            used[order[i]] = true;
+
     for (size_t i = 0; i < n; i++)
-    {
         if (!used[i])
-        {
             order.push_back(i);
-            used[i] = true;
-        }
-    }
+
     return order;
 }
 

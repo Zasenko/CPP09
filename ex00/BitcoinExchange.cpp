@@ -15,58 +15,33 @@ void BitcoinExchange::createDB()
 
     std::string line;
     int isFirstLine = 1;
-    
+
     while (std::getline(file, line))
     {
         trim(line);
         if (isFirstLine)
         {
             if (line != "date,exchange_rate")
-            {
-                file.close();
                 throw std::logic_error("Incorrect header in data.csv");
-            }
             isFirstLine = 0;
             continue;
         }
-
         std::string::iterator it = std::find(line.begin(), line.end(), ',');
         if (it == line.end())
-        {
-            file.close();
             throw std::logic_error("Incorrect data in data.csv: " + line);
-        }
-
         std::string key(line.begin(), it);
-        if (key.empty() || key.size() != 10) {
-            file.close();
+        if (key.empty() || key.size() != 10)
             throw std::logic_error("Incorrect date in data.csv: " + line);
-        }
-
         if (!isDateValid(key))
-        {
-            file.close();
             throw std::logic_error("Incorrect date in data.csv: " + line);
-        }
-      
         it++;
         if (it == line.end())
-        {
-            file.close();
             throw std::logic_error("Incorrect value in data.csv: " + line);
-        }
-
         std::string valueStr(it, line.end());
-        if (valueStr.empty()) {
-            file.close();
+        if (valueStr.empty())
             throw std::logic_error("Incorrect value in data.csv: " + line);
-        }
-        
         if (!isDigitsAndDot(valueStr))
-        {
-            file.close();
             throw std::logic_error("Incorrect value in data.csv: " + line);
-        }
 
         double value;
         try
@@ -75,29 +50,22 @@ void BitcoinExchange::createDB()
         }
         catch (const std::logic_error &e)
         {
-            file.close();
             throw std::logic_error(std::string("Incorrect value in data.csv: ") + e.what());
         }
         if (value < 0)
         {
-            file.close();
             throw std::logic_error("not a positive number in data.csv: " + line);
         }
         _db[key] = value;
     }
     if (file.bad())
-    {
-        file.close();
         throw std::logic_error("reading file data.csv failed");
-    }
     file.close();
     if (_db.empty())
-    {
         throw std::logic_error("data Base from data.csv is empty");
-    }
 }
 
-void BitcoinExchange::makeSecond(const std::string &fileName) const
+void BitcoinExchange::exchange(const std::string &fileName) const
 {
 
     std::fstream file;
@@ -116,11 +84,19 @@ void BitcoinExchange::makeSecond(const std::string &fileName) const
 
         if (isFirstLine)
         {
-            if (line != "date | value")
-            {
-                file.close();
-                throw std::logic_error("bad header in file " + fileName);
-            }
+            size_t headerDelimPosition = line.find('|');
+            if (headerDelimPosition == std::string::npos)
+                throw std::logic_error("bad header in file " + fileName + ": " + line);
+
+            std::string headerKey = line.substr(0, headerDelimPosition);
+            std::string headerVal = line.substr(headerDelimPosition + 1);
+
+            trim(headerKey);
+            trim(headerVal);
+
+            if (headerKey.empty() || headerKey != "date" || headerVal.empty() || headerVal != "value")
+                throw std::logic_error("bad header in file " + fileName + ": " + line);
+
             isFirstLine = false;
             continue;
         }
@@ -206,15 +182,10 @@ void BitcoinExchange::makeSecond(const std::string &fileName) const
         std::cout << key << " => " << value << " = " << result << std::endl;
     }
     if (file.bad())
-    {
-        file.close();
         throw std::logic_error("reading file " + fileName + " failed" );
-    }
     file.close();
-
-    if (isFirstLine) {
+    if (isFirstLine)
         throw std::logic_error("File " + fileName + " is empty");
-    }
 }
 
 void BitcoinExchange::trim(std::string &s) const {

@@ -15,7 +15,7 @@ typedef std::deque<int> deq;
 typedef std::deque<deq> pairDeq;
 
 class PmergeMe {
-        public:
+    public:
         PmergeMe(int ac, char *av[]);
         ~PmergeMe();
         void sort();
@@ -27,13 +27,13 @@ class PmergeMe {
         vec _v;
         deq _d;
 
-        vec sortVector(const vec &v);
+        vec sortVector(const vec &v, int &count);
         // deq sortDeque(const deq &d);
 
-        void insertPendVector(vec &sorted, const vec &pend);
+        void insertPendVector(vec &sorted, const vec &pend, int &count);
 
         std::vector<size_t> buildJacobOrder(size_t n);
-
+        
         void trim(std::string &s);
         bool isNumber(const std::string &str);
 };

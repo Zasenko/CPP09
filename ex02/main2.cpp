@@ -1,6 +1,104 @@
 
 #include "PmergeMe.hpp"
 
+std::vector<size_t> PmergeMe::buildJacobOrder(size_t n)
+{
+    std::vector<size_t> order;
+    if (n == 0)
+        return order;
+
+    // Построение чисел Якобсталя J_k
+    std::vector<size_t> jNums;
+    jNums.push_back(0);
+    jNums.push_back(1);
+
+    while (true)
+    {
+        size_t next = jNums.back() + 2 * jNums[jNums.size() - 2];
+        if (next >= n)
+            break;
+        jNums.push_back(next);
+    }
+
+    // Генерация порядка вставки: группы в обратном порядке
+    for (int k = jNums.size() - 1; k > 0; --k)
+    {
+        size_t start = jNums[k - 1];
+        size_t end = std::min(jNums[k], n);
+
+        // Добавляем элементы от end-1 до start (в обратном порядке)
+        for (size_t i = end; i > start; --i)
+        {
+            size_t idx = i - 1;
+            if (idx < n)
+                order.push_back(idx);
+        }
+    }
+
+    // Проверка, что все индексы от 0 до n-1 есть
+    std::vector<bool> used(n, false);
+    for (size_t i = 0; i < order.size(); i++)
+        if (order[i] < n)
+            used[order[i]] = true;
+
+    for (size_t i = 0; i < n; i++)
+        if (!used[i])
+            order.push_back(i);
+
+    return order;
+}
+
+void PmergeMe::insertPendVector(vec &sorted, const vec &pend)
+{
+    if (pend.empty())
+        return;
+
+    std::vector<size_t> jacobOrder = buildJacobOrder(pend.size());
+
+    for (size_t i = 0; i < jacobOrder.size(); ++i)
+    {
+        size_t idx = jacobOrder[i];
+        if (idx >= pend.size())
+            continue;
+
+        int value = pend[idx];
+        size_t pos = 0;
+
+        // Первые три элемента вставляем напрямую (без бинарного поиска)
+        if (sorted.empty() || value <= sorted.front())
+            pos = 0;
+        else if (value >= sorted.back())
+            pos = sorted.size();
+        else if (i < 3)
+        {
+            // Для первых вставок — линейный поиск (ближе к поведению merge-insertion)
+            for (pos = 0; pos < sorted.size(); ++pos)
+            {
+                if (value < sorted[pos])
+                    break;
+            }
+        }
+        else
+        {
+            // Остальные — бинарный поиск
+            size_t left = 0;
+            size_t right = sorted.size();
+            while (left < right)
+            {
+                size_t mid = left + (right - left) / 2;
+                if (sorted[mid] < value)
+                    left = mid + 1;
+                else
+                    right = mid;
+            }
+            pos = left;
+        }
+
+        sorted.insert(sorted.begin() + pos, value);
+    }
+}
+
+
 vec algor(const vec &cont);
 
 void trim(std::string &s) {

@@ -31,7 +31,7 @@ int main(int ac, char *av[])
     try
     {
         BitcoinExchange exchange;
-        exchange.makeSecond(fileName);
+        exchange.exchange(fileName);
     }
     catch (const std::logic_error &e)
     {
@@ -42,7 +42,6 @@ int main(int ac, char *av[])
     {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
-
     }
     catch (...)
     {
