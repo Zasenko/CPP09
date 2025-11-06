@@ -161,6 +161,12 @@ void BitcoinExchange::makeSecond(const std::string &fileName) const
             continue;
         }
 
+        if (isMoreThanThousand(valueStr))
+        {
+            std::cerr << "Error: bad input => " << valueStr << std::endl;
+            continue;
+        }
+
         double value;
         try
         {
@@ -256,16 +262,42 @@ bool BitcoinExchange::isStringDoubleCorrect(const std::string &str) const
 bool BitcoinExchange::isMoreThanThousand(const std::string &str) const
 {
     std::string::size_type pos = str.find('.');
-    std::string intPart = (pos == std::string::npos) ? str : str.substr(0, pos);
+    std::string intPart;
 
-    while (intPart.size() > 1 && intPart[0] == '0')
-        intPart.erase(0, 1);
+    if (pos == std::string::npos)
+    {
+        intPart = str;
+        while (intPart.size() > 1 && intPart[0] == '0')
+            intPart.erase(0, 1);
+        if (intPart.size() > 4)
+            return true;
+        if (intPart.size() < 4)
+            return false;
+        return intPart > "1000";
+    }
+    else
+    {
+        intPart = str.substr(0, pos);
+        while (intPart.size() > 1 && intPart[0] == '0')
+            intPart.erase(0, 1);
+        if (intPart.size() > 4)
+            return true;
+        if (intPart.size() < 4)
+            return false;
 
-    if (intPart.size() > 4)
-        return true; // 10000, 123456...
-    if (intPart.size() < 4)
-        return false;        // 0, 5, 999...
-    return intPart > "1000"; // строковое сравнение
+        if (intPart > "1000")
+            return true;
+        if (intPart == "1000")
+        {
+            std::string restPart = str.substr(pos + 1, str.size() - 1); //?? overflow
+            for (size_t i = 0; i < restPart.size(); i++)
+            {
+                if (restPart[i] > '0')
+                    return true;
+            }
+        }
+        return false;
+    }
 }
 
 bool BitcoinExchange::isDateValid(const std::string& date) const

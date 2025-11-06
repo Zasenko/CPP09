@@ -36,17 +36,25 @@ PmergeMe::PmergeMe(int ac, char *av[])
 
 void PmergeMe::sort()
 {
-    clock_t start = clock();
+    clock_t vectorStart = clock();
     vec vectorResult = sortVector(_v);
-    clock_t end = clock();
+    clock_t vectorEnd = clock();
 
     std::cout << "After: ";
     for (size_t i = 0; i < vectorResult.size(); i++)
         std::cout << vectorResult[i] << " ";
     std::cout << std::endl;
     
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Time elapsed: " << elapsed << " seconds" << std::endl;
+    double vectorElapsed = double(vectorEnd - vectorStart) / CLOCKS_PER_SEC;
+    std::cout << "Time elapsed: " << vectorElapsed << " seconds" << std::endl;
+
+    // clock_t dequeStart = clock();
+    // vec vectorResult = sortVector(_v);
+    // clock_t dequeEnd = clock();
+
+    // double dequeElapsed = double(dequeEnd - dequeStart) / CLOCKS_PER_SEC;
+    // std::cout << "Time elapsed: " << dequeElapsed << " seconds" << std::endl;
+
 }
 
 vec PmergeMe::sortVector(const vec &vector)
@@ -132,20 +140,8 @@ vec PmergeMe::sortVector(const vec &vector)
         // std::cout << "hasRest insert at position: " << pos << ", value: " << rest << std::endl;
         big.insert(big.begin() + pos, rest);
     }
-
-    // // вывод
-    // for (size_t i = 0; i < big.size(); i++)
-    //     std::cout << big[i] << " ";
-    // std::cout << std::endl;
     return big;
 }
-
-// deq PmergeMe::sortDeque(const deq &d)
-// {
-//     (void)d;
-// }
-
-// --- INSERT ---
 
 void PmergeMe::insertPendVector(vec &sorted, const vec &pend)
 {
@@ -244,6 +240,13 @@ std::vector<size_t> PmergeMe::buildJacobOrder(size_t n)
     }
     return order;
 }
+
+// deq PmergeMe::sortDeque(const deq &d)
+// {
+//     (void)d;
+// }
+
+// --- INSERT ---
 
 
 // --- UTILS ---

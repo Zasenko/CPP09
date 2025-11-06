@@ -12,7 +12,7 @@ typedef std::vector<int> vec;
 typedef std::vector<vec> pairVec;
 
 typedef std::deque<int> deq;
-typedef std::deque<int> pairDeq;
+typedef std::deque<deq> pairDeq;
 
 class PmergeMe {
         public:
