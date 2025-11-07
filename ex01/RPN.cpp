@@ -25,7 +25,8 @@ void RPN::process(const std::string &arg)
             
             if (token == "/")
             {
-                if (n1 == 0) throw std::logic_error("Can't devide by 0");
+                if (n1 == 0)
+                    throw std::logic_error("Can't divide by 0");
                 result = static_cast<long>(n2) / static_cast<long>(n1);
             }
             else if (token == "-")
@@ -40,8 +41,10 @@ void RPN::process(const std::string &arg)
             {
                 result = static_cast<long>(n2) + static_cast<long>(n1);
             }
-            if (result > INT_MAX) throw std::logic_error("Resut is very big number");
-            if (result < INT_MIN) throw std::logic_error("Resut is very small number");
+            if (result > INT_MAX)
+                throw std::logic_error("Result is very big number");
+            if (result < INT_MIN)
+                throw std::logic_error("Result is very small number");
             _stack.push(result);
         }
         else

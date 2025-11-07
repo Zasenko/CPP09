@@ -1,63 +1,5 @@
 #include "PmergeMe.hpp"
 
-size_t binarySearch(const vec &sorted, int value, int &count)
-{
-    if (sorted.empty())
-        return 0;
-
-    size_t left = 0;
-    size_t right = sorted.size();
-    
-    while (left < right)
-    {
-        count++;
-        size_t mid = left + (right - left) / 2;
-        if (sorted[mid] < value)
-            left = mid + 1;
-        else
-            right = mid;
-    }
-    return left;
-}
-
-std::vector<size_t> buildJacobOrder2(size_t n)
-{
-    std::vector<size_t> order;
-    if (n == 0) return order;
-    
-    // Generate Jacobsthal numbers up to n
-    std::vector<size_t> jacob;
-    jacob.push_back(1);
-    jacob.push_back(3);
-    
-    while (jacob.back() < n)
-    {
-        size_t next = jacob[jacob.size() - 1] + 2 * jacob[jacob.size() - 2];
-        jacob.push_back(next);
-    }
-    
-    // Build insertion order
-    order.push_back(0); // First element is always at index 0
-    
-    for (size_t i = 0; i < jacob.size(); i++)
-    {
-        size_t j = jacob[i];
-        if (j < n) order.push_back(j);
-        
-        // Add numbers between previous Jacobsthal numbers
-        if (i > 0)
-        {
-            size_t prev = jacob[i - 1];
-            for (size_t k = j - 1; k > prev; k--)
-            {
-                if (k < n) order.push_back(k);
-            }
-        }
-    }
-    
-    return order;
-}
-
 PmergeMe::~PmergeMe() {}
 
 PmergeMe::PmergeMe(int ac, char *av[])
@@ -93,82 +35,44 @@ PmergeMe::PmergeMe(int ac, char *av[])
 
 void PmergeMe::sort()
 {
-    int count = 0;
-
-    clock_t vectorStart = clock();
-    vec vectorResult = sortVector(_v, count);
-    clock_t vectorEnd = clock();
+    // --- Vector ---
+    clock_t vStart = clock();
+    vec vSorted = sortVector(_v);
+    clock_t vEnd = clock();
 
     std::cout << "After: ";
-    for (size_t i = 0; i < vectorResult.size(); i++)
-        std::cout << vectorResult[i] << " ";
+    for (size_t i = 0; i < vSorted.size(); i++)
+        std::cout << vSorted[i] << " ";
     std::cout << std::endl;
-    
-    double vectorElapsed = double(vectorEnd - vectorStart) / CLOCKS_PER_SEC;
-    std::cout << "Time elapsed: " << vectorElapsed << " seconds" << std::endl;
 
-        std::cout << "Count: " << count << std::endl;
+    double vTime = double(vEnd - vStart) / CLOCKS_PER_SEC * 1e6;
+    std::cout << std::fixed << std::setprecision(5)
+              << "Time to process a range of " << _v.size()
+              << " elements with std::vector: " << vTime << " us" << std::endl;
 
+    // --- Deque ---
+    clock_t dStart = clock();
+    deq dSorted = sortDeque(_d);
+    clock_t dEnd = clock();
 
-    // clock_t dequeStart = clock();
-    // vec vectorResult = sortVector(_v);
-    // clock_t dequeEnd = clock();
-
-    // double dequeElapsed = double(dequeEnd - dequeStart) / CLOCKS_PER_SEC;
-    // std::cout << "Time elapsed: " << dequeElapsed << " seconds" << std::endl;
-
+    double dTime = double(dEnd - dStart) / CLOCKS_PER_SEC * 1e6;
+    std::cout << std::fixed << std::setprecision(5)
+              << "Time to process a range of " << _d.size()
+              << " elements with std::deque: " << dTime << " us" << std::endl;
 }
 
-vec PmergeMe::sortVector(const vec &vector, int &count)
+// --- Vector ---
+
+vec PmergeMe::sortVector(const vec &vector)
 {
     size_t vectorSize = vector.size();
     if (vectorSize < 2) return vector;
-    
-    pairVec pCont;
 
-    for (size_t i = 0; i < vectorSize; )
-    {
-        vec pair;
-        if (i + 1 < vectorSize)
-        {
-            count++;
-            if (vector[i] < vector[i + 1])
-            {
-                pair.push_back(vector[i]);
-                pair.push_back(vector[i + 1]);
-            }
-            else
-            {
-                pair.push_back(vector[i + 1]);
-                pair.push_back(vector[i]);
-            }
-            i++;
-            i++;
-        }
-        else
-        {
-            pair.push_back(vector[i]);
-            i++;
-        }
-        pCont.push_back(pair);
-    }
-
-    for (size_t i = 0; i < pCont.size(); i++)
-    {
-        std::cout << "[ ";
-        for (size_t z = 0; z < pCont[i].size(); z++)
-        {
-            std::cout << pCont[i][z] << " ";
-        }
-        std::cout << "] ";
-    }
-    std::cout << std::endl;
-
+    pairVec pCont = makePairs(vector);
     vec big;
     vec pend;
     int rest = 0;
     bool hasRest = false;
-
     for (size_t i = 0; i < pCont.size(); i++)
     {
         if (pCont[i].size() == 1)
@@ -182,69 +86,177 @@ vec PmergeMe::sortVector(const vec &vector, int &count)
             big.push_back(pCont[i][1]);
         }
     }
-
-    big = sortVector(big, count);
-    insertPendVector(big, pend, count);
+    big = sortVector(big);
+    insertPendVector(big, pend);
     if (hasRest)
     {
-        size_t position = binarySearch(big, rest, count);
-        std::cout << "hasRest insert at position: " << position << ", value: " << rest << std::endl;
+        size_t position = binarySearch(big, rest);
         big.insert(big.begin() + position, rest);
     }
     return big;
 }
 
-void PmergeMe::insertPendVector(vec &sorted, const vec &pend, int &count)
+pairVec PmergeMe::makePairs(const vec &v)
+{
+    pairVec pCont;
+    for (size_t i = 0; i < v.size();)
+    {
+        vec pair;
+        if (i + 1 < v.size())
+        {
+            if (v[i] < v[i + 1])
+            {
+                pair.push_back(v[i]);
+                pair.push_back(v[i + 1]);
+            }
+            else
+            {
+                pair.push_back(v[i + 1]);
+                pair.push_back(v[i]);
+            }
+            i += 2;
+        }
+        else
+        {
+            pair.push_back(v[i]);
+            i++;
+        }
+        pCont.push_back(pair);
+    }
+    return pCont;
+}
+
+void PmergeMe::insertPendVector(vec &sorted, const vec &pend)
 {
     if (pend.empty())
         return;
-        
-    std::vector<size_t> jacobOrder2 = buildJacobOrder2(pend.size());
 
-    std::cout << "Jacobsthal order: ";
-    for (size_t i = 0; i < jacobOrder2.size(); i++)
-        std::cout << jacobOrder2[i] << " ";
-    std::cout << std::endl;
-
-    for (size_t i = 0; i < jacobOrder2.size(); i++)
+    vec jacobOrder = buildJacobOrder<vec>(pend.size());
+    std::vector<bool> inserted(pend.size(), false);
+    for (size_t i = 0; i < jacobOrder.size(); i++)
     {
-        size_t idx = jacobOrder2[i];
-        if (idx >= pend.size())
+        size_t idx = jacobOrder[i];
+        if (idx >= pend.size() || inserted[idx])
             continue;
-
-        int value = pend[idx];
+        size_t value = pend[idx];
         size_t pos = 0;
-
-        // Оптимизация: вставка в начало или конец без бинарного поиска
-        if (sorted.empty() || value <= sorted.front())
+        if (sorted.empty())
             pos = 0;
-        else if (value >= sorted.back())
-            pos = sorted.size();
-        else if (i < 3)
-        {
-            for (pos = 0; pos < sorted.size(); pos++)
-            {
-                if (value < sorted[pos])
-                    break;
-            }
-        }
         else
-            pos = binarySearch(sorted, value, count);
-
-        std::cout << "Insert pend[" << idx << "] = " << value << " at position " << pos << std::endl;
+        {
+            if (value <= sorted.front())
+                pos = 0;
+            else if (value >= sorted.back())
+                pos = sorted.size();
+            else
+                pos = binarySearch(sorted, value);
+        } 
+        if (pos > sorted.size())
+            pos = sorted.size();
         sorted.insert(sorted.begin() + pos, value);
+        inserted[idx] = true;
     }
 }
 
-// deq PmergeMe::sortDeque(const deq &d)
-// {
-//     (void)d;
-// }
+// --- Deque ---
 
-// --- INSERT ---
+deq PmergeMe::sortDeque(const deq &deque)
+{
+    size_t deqSize = deque.size();
+    if (deqSize < 2)
+        return deque;
 
+    pairDeq pCont = makePairs(deque);
+    deq big;
+    deq pend;
+    int rest = 0;
+    bool hasRest = false;
+    for (size_t i = 0; i < pCont.size(); i++)
+    {
+        if (pCont[i].size() == 1)
+        {
+            hasRest = true;
+            rest = pCont[i][0];
+        }
+        else
+        {
+            pend.push_back(pCont[i][0]);
+            big.push_back(pCont[i][1]);
+        }
+    }
+    big = sortDeque(big);
+    insertPendDeque(big, pend);
+    if (hasRest)
+    {
+        size_t position = binarySearch(big, rest);
+        big.insert(big.begin() + position, rest);
+    }
+    return big;
+}
 
-// --- UTILS ---
+pairDeq PmergeMe::makePairs(const deq &v)
+{
+    pairDeq pCont;
+    for (size_t i = 0; i < v.size();)
+    {
+        deq pair;
+        if (i + 1 < v.size())
+        {
+            if (v[i] < v[i + 1])
+            {
+                pair.push_back(v[i]);
+                pair.push_back(v[i + 1]);
+            }
+            else
+            {
+                pair.push_back(v[i + 1]);
+                pair.push_back(v[i]);
+            }
+            i += 2;
+        }
+        else
+        {
+            pair.push_back(v[i]);
+            i++;
+        }
+        pCont.push_back(pair);
+    }
+    return pCont;
+}
+
+void PmergeMe::insertPendDeque(deq &sorted, const deq &pend)
+{
+    if (pend.empty())
+        return;
+
+    deq jacobOrder = buildJacobOrder<deq>(pend.size());
+    std::vector<bool> inserted(pend.size(), false);
+    for (size_t i = 0; i < jacobOrder.size(); i++)
+    {
+        size_t idx = jacobOrder[i];
+        if (idx >= pend.size() || inserted[idx])
+            continue;
+        size_t value = pend[idx];
+        size_t pos = 0;
+        if (sorted.empty())
+            pos = 0;
+        else
+        {
+            if (value <= sorted.front())
+                pos = 0;
+            else if (value >= sorted.back())
+                pos = sorted.size();
+            else
+                pos = binarySearch(sorted, value);
+        }
+        if (pos > sorted.size())
+            pos = sorted.size();
+        sorted.insert(sorted.begin() + pos, value);
+        inserted[idx] = true;
+    }
+}
+
+// --- Utils ---
 
 void PmergeMe::trim(std::string &s)
 {
