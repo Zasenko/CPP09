@@ -43,6 +43,11 @@ void BitcoinExchange::createDB()
         if (!isDigitsAndDot(valueStr))
             throw std::logic_error("Incorrect value in data.csv: " + line);
 
+        if (!isStringDoubleCorrect(valueStr))
+        {
+            std::cerr << "Error: bad input => " << valueStr << std::endl;
+            continue;
+        }
         double value;
         try
         {
@@ -139,7 +144,7 @@ void BitcoinExchange::exchange(const std::string &fileName) const
 
         if (isMoreThanThousand(valueStr))
         {
-            std::cerr << "Error: bad input => " << valueStr << std::endl;
+            std::cerr << "Error: too large a number." << std::endl;
             continue;
         }
 
@@ -200,6 +205,7 @@ void BitcoinExchange::trim(std::string &s) const {
 
 bool BitcoinExchange::isDigitsAndDash(const std::string& str) const
 {
+    if (str.size() != 10) return false;
     return str.find_first_not_of("0123456789-") == std::string::npos;
 }
 
@@ -213,9 +219,12 @@ bool BitcoinExchange::isStringDoubleCorrect(const std::string &str) const
     bool dotFound = false;
 
     size_t i = 0;
-    if (str[i] == '-')
+    
+     if (str[i] == '-')
         i++;
-
+    
+    if (!std::isdigit(str[i]))
+        return false;
     for (; i < str.size(); i++)
     {
         if (str[i] == '.')
@@ -223,6 +232,7 @@ bool BitcoinExchange::isStringDoubleCorrect(const std::string &str) const
             if (dotFound)
                 return false;
             dotFound = true;
+            if (i + 1 >= str.size()) return false;
         }
         else if (!std::isdigit(str[i]))
             return false;

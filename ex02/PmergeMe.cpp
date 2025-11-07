@@ -45,8 +45,8 @@ void PmergeMe::sort()
         std::cout << vSorted[i] << " ";
     std::cout << std::endl;
 
-    double vTime = double(vEnd - vStart) / CLOCKS_PER_SEC * 1e6;
-    std::cout << std::fixed << std::setprecision(5)
+    double vTime = double(vEnd - vStart) / CLOCKS_PER_SEC;
+    std::cout << std::fixed << std::setprecision(6)
               << "Time to process a range of " << _v.size()
               << " elements with std::vector: " << vTime << " us" << std::endl;
 
@@ -55,8 +55,8 @@ void PmergeMe::sort()
     deq dSorted = sortDeque(_d);
     clock_t dEnd = clock();
 
-    double dTime = double(dEnd - dStart) / CLOCKS_PER_SEC * 1e6;
-    std::cout << std::fixed << std::setprecision(5)
+    double dTime = double(dEnd - dStart) / CLOCKS_PER_SEC;
+    std::cout << std::fixed << std::setprecision(6)
               << "Time to process a range of " << _d.size()
               << " elements with std::deque: " << dTime << " us" << std::endl;
 }

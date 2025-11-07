@@ -43,10 +43,5 @@ int main(int ac, char *av[])
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
-    catch (...)
-    {
-        std::cerr << "Undefined Error!" << std::endl;
-        return 1;
-    }
     return 0;
 }

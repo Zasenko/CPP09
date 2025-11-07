@@ -65,7 +65,6 @@ class PmergeMe {
             if (n == 0)
                 return order;
 
-            // Generate Jacobsthal numbers up to n
             Container jacob;
             jacob.push_back(1);
             jacob.push_back(3);
@@ -75,13 +74,12 @@ class PmergeMe {
                 size_t next = jacob[jacob.size() - 1] + 2 * jacob[jacob.size() - 2];
                 jacob.push_back(next);
             }
-            order.push_back(0); // First element is always at index 0
+            order.push_back(0);
             for (size_t i = 0; i < jacob.size(); i++)
             {
                 size_t j = jacob[i];
                 if (j < n)
                     order.push_back(j);
-                // Add numbers between previous Jacobsthal numbers
                 if (i > 0)
                 {
                     size_t prev = jacob[i - 1];
@@ -90,7 +88,7 @@ class PmergeMe {
                         if (k < n)
                             order.push_back(k);
                         if (k - 1 == prev)
-                            break; // защита от size_t underflow
+                            break;
                     }
                 }
             }
