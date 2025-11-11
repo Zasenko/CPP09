@@ -9,11 +9,11 @@
 #include <ctime>
 #include <iomanip>
 
-typedef std::vector<size_t> vec;
-typedef std::vector<vec> pairVec;
+typedef std::vector<int> Vector;
+typedef std::vector<Vector> Vector2D;
 
-typedef std::deque<size_t> deq;
-typedef std::deque<deq> pairDeq;
+typedef std::deque<int> Deque;
+typedef std::deque<Deque> DequeD2;
 
 class PmergeMe {
     public:
@@ -25,75 +25,21 @@ class PmergeMe {
         PmergeMe(const PmergeMe &copy);
         PmergeMe &operator=(const PmergeMe &src);
 
-        vec _v;
-        deq _d;
+        Vector _v;
+        Deque _d;
 
-        vec sortVector(const vec &v);
-        deq sortDeque(const deq &d);
+        Vector sortVector(Vector &v, int level, bool isDebug);
+        // Deque sortDeque(Deque &d, int level, bool isDebug);
 
-        pairVec makePairs(const vec &v);
-        pairDeq makePairs(const deq &v);
+        // pairVec makePairs(const vec &v);
+        // pairDeq makePairs(const deq &v);
 
-        void insertPendVector(vec &sorted, const vec &pend);
-        void insertPendDeque(deq &sorted, const deq &pend);
+        // void insertPendVector(vec &sorted, const vec &pend);
+        // void insertPendDeque(deq &sorted, const deq &pend);
 
         void trim(std::string &s);
         bool isNumber(const std::string &str);
 
-        template <typename Container>
-        size_t binarySearch(const Container &sorted, typename Container::value_type value)
-        {
-            if (sorted.empty())
-                return 0;
-            size_t left = 0;
-            size_t right = sorted.size();
-            while (left < right)
-            {
-                size_t mid = left + (right - left) / 2;
-                if (sorted[mid] < value)
-                    left = mid + 1;
-                else
-                    right = mid;
-            }
-            return left;
-        }
-
-        template <typename Container>
-        Container buildJacobOrder(size_t n)
-        {
-            Container order;
-            if (n == 0)
-                return order;
-
-            Container jacob;
-            jacob.push_back(1);
-            jacob.push_back(3);
-
-            while (jacob.back() < n)
-            {
-                size_t next = jacob[jacob.size() - 1] + 2 * jacob[jacob.size() - 2];
-                jacob.push_back(next);
-            }
-            order.push_back(0);
-            for (size_t i = 0; i < jacob.size(); i++)
-            {
-                size_t j = jacob[i];
-                if (j < n)
-                    order.push_back(j);
-                if (i > 0)
-                {
-                    size_t prev = jacob[i - 1];
-                    for (size_t k = j - 1; k > prev; k--)
-                    {
-                        if (k < n)
-                            order.push_back(k);
-                        if (k - 1 == prev)
-                            break;
-                    }
-                }
-            }
-            return order;
-        }
 };
 
 #endif
