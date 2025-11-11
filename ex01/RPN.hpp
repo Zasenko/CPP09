@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stack>
+#include <list>
 #include <sstream>
 #include <cstdlib>
 #include <climits>
@@ -17,7 +18,7 @@ class RPN {
         RPN(const RPN &copy);
         RPN &operator=(const RPN &src);
 
-        std::stack<int> _stack;
+        std::stack<int, std::list<int> > _stack;
 
         bool isOperator(const std::string &str);
         bool isNumber(const std::string &token);
